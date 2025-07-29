@@ -31,18 +31,5 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = "term://*",
-	callback = function()
-		vim.cmd("startinsert")
-	end,
-})
-vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = "term://*",
-	callback = function()
-		vim.cmd("startinsert")
-	end,
-})
-
 -- GUI Configuration
 vim.opt.guifont = { "Source Code Pro", ":h18" }

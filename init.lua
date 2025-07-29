@@ -30,3 +30,8 @@ vim.cmd("colorscheme catppuccin")
 vim.keymap.set("n", "<leader>f", function()
 	vim.cmd("Neotree toggle")
 end, { desc = "Toggle Neotree" })
+
+-- toggle term
+vim.keymap.set("n", "<leader>t", function()
+	vim.cmd("ToggleTerm")
+end, { desc = "Toggle Terminal" })

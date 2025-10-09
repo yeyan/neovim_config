@@ -26,7 +26,7 @@ require("lazy").setup("plugins", {
 -- set colorscheme
 vim.cmd("colorscheme catppuccin")
 
--- custom function
+-- toggle neotree
 vim.keymap.set("n", "<leader>f", function()
 	vim.cmd("Neotree toggle")
 end, { desc = "Toggle Neotree" })
@@ -35,3 +35,8 @@ end, { desc = "Toggle Neotree" })
 vim.keymap.set("n", "<leader>t", function()
 	vim.cmd("ToggleTerm")
 end, { desc = "Toggle Terminal" })
+
+-- toggle markdown preview
+vim.keymap.set("n", "<leader>m", function()
+	vim.cmd("MarkdownPreviewToggle")
+end, { desc = "Toggle Preview" })

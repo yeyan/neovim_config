@@ -16,8 +16,15 @@ return {
 			formatters_by_ft = {
 				lua = { "stylua" }, -- Use stylua for Lua files
 				rust = { "rustfmt" }, -- Use rustfmt for Rust files
+				python = { "black" },
 				-- Add other filetypes/formatters here if needed later
 				-- javascript = { 'prettier' },
+			},
+
+			formatters = {
+				black = {
+					command = "/opt/homebrew/bin/black",
+				},
 			},
 		})
 	end,

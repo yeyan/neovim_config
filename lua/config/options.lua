@@ -27,6 +27,7 @@ vim.keymap.set("t", "<C-l>", [[<C-\><C-n><C-w>l]], { noremap = true })
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "term://*",
 	callback = function()
+		vim.cmd("normal! G")
 		vim.cmd("startinsert")
 	end,
 })

@@ -14,16 +14,23 @@ return {
 
 			-- Define which formatters to use for each filetype
 			formatters_by_ft = {
-				lua = { "stylua" }, -- Use stylua for Lua files
-				rust = { "rustfmt" }, -- Use rustfmt for Rust files
-				python = { "black" },
+				lua = { "stylua" },
+				rust = { "rustfmt" },
+				python = {
+					"isort",
+					"black",
+				},
 				-- Add other filetypes/formatters here if needed later
-				-- javascript = { 'prettier' },
+				html = { "prettier" },
+				javascript = { "prettier" },
 			},
 
 			formatters = {
 				black = {
 					command = "/opt/homebrew/bin/black",
+				},
+				isort = {
+					command = "/opt/homebrew/bin/isort",
 				},
 			},
 		})

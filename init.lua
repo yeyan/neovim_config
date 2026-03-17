@@ -23,6 +23,9 @@ require("lazy").setup("plugins", {
 	},
 })
 
+-- load LSP config
+require("config.lsp")
+
 -- set colorscheme
 vim.cmd("colorscheme catppuccin")
 
@@ -40,3 +43,30 @@ end, { desc = "Toggle Terminal" })
 vim.keymap.set("n", "<leader>m", function()
 	vim.cmd("MarkdownPreviewToggle")
 end, { desc = "Toggle Preview" })
+
+-- keybinding for only OSX
+if vim.loop.os_uname().sysname == "Darwin" then
+	local opts = {
+		noremap = true,
+		silent = true,
+	}
+
+	function do_paste()
+		-- get content from system clip board
+		local content = vim.fn.getreg("+")
+
+		-- split content into lines
+		local lines = {}
+		for line in content:gmatch("([^\n\r]+)") do
+			table.insert(lines, line)
+		end
+
+		-- put lines after cursor
+		vim.api.nvim_put(lines, "c", true, true)
+	end
+
+	vim.keymap.set("n", "<D-v>", do_paste, opts)
+	vim.keymap.set("i", "<D-v>", do_paste, opts)
+	vim.keymap.set("t", "<D-v>", do_paste, opts)
+	vim.api.nvim_set_keymap("v", "<D-c>", '"+y<CR>', opts)
+end

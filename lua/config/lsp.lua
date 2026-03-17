@@ -2,7 +2,8 @@
 local M = {}
 
 function M.setup()
-	local lspconfig = require("lspconfig")
+	print("loading lsp configration")
+
 	local mason = require("mason")
 	local mason_lspconfig = require("mason-lspconfig")
 
@@ -17,84 +18,92 @@ function M.setup()
 		},
 	})
 
-	-- Define general LSP capabilities for nvim-cmp
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	-- If you include 'hrsh7th/cmp-nvim-lsp' as a dependency, use:
-	-- capabilities = require('cmp_nvim_lsp').default_capabilities()
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(ev)
+			print("on attached called")
+			local bufnr = ev.buf
 
-	-- Define the function that runs when an LSP client attaches to a buffer
-	local on_attach = function(client, bufnr)
-		-- Enable completion (needed for LSP, even if using nvim-cmp)
-		vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+			vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
-		-- Buffer-local keymaps for LSP actions
-		local opts = { noremap = true, silent = true, buffer = bufnr }
+			-- Buffer-local keymaps for LSP actions
+			local opts = { noremap = true, silent = true, buffer = bufnr }
 
-		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts) -- Go to definition
-		vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- Go to declaration
-		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts) -- Go to implementation
-		vim.keymap.set("n", "gr", vim.lsp.buf.references, opts) -- Show references
-		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts) -- Show hover documentation
-		vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- Rename symbol
-		vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts) -- Code action
-		vim.keymap.set("n", "<leader>f", function() -- Format code
-			vim.lsp.buf.format({ async = true })
-		end, opts)
-	end
+			vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts) -- Go to definition
+			vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- Go to declaration
+			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts) -- Go to implementation
+			vim.keymap.set("n", "gr", vim.lsp.buf.references, opts) -- Show references
+			vim.keymap.set("n", "K", vim.lsp.buf.hover, opts) -- Show hover documentation
+			vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- Rename symbol
+			vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts) -- Code action
+
+			-- Global keymaps for LSP diagnostics
+			vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
+			vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
+			vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
+			vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
+		end,
+	})
 
 	-- Setup Mason to install and configure specific LSP servers
 	mason_lspconfig.setup({
 		ensure_installed = {
 			"lua_ls", -- Lua Language Server
+			"basedpyright", -- Python Language Server
 		},
+		automatic_installation = true,
 		automatic_enable = {
 			exclude = { "rust_analyzer" },
 		},
-		handlers = {
-			-- Default handler for all servers managed by Mason
-			function(server_name)
-				lspconfig[server_name].setup({
-					on_attach = on_attach,
-					capabilities = capabilities,
-					-- General settings that apply to most servers go here
-				})
+	})
+
+	vim.g.rustaceanvim = {
+		-- This `on_attach` function is called after the `rust-analyzer` LSP
+		-- server has successfully attached to a buffer.
+		server = {
+			on_attach = function(client, bufnr)
+				-- You can set LSP keymaps here.
+				-- These mappings will only apply to rust files.
+				local map = vim.keymap.set
+				local opts = { silent = true, buffer = bufnr }
+
+				-- LSP hover actions, including for rust-analyzer.
+				map("n", "K", function()
+					vim.cmd.RustLsp({ "hover", "actions" })
+				end, opts)
+
+				map("n", "gd", vim.lsp.buf.definition, opts) -- Go to definition
+				map("n", "gD", vim.lsp.buf.declaration, opts) -- Go to declaration
+				map("n", "gi", vim.lsp.buf.implementation, opts) -- Go to implementation
+
+				map("n", "[d", function()
+					vim.cmd.RustLsp({ "renderDiagnostic", "cycle_prev" })
+				end, opts)
+				map("n", "]d", function()
+					vim.cmd.RustLsp({ "renderDiagnostic", "cycle" })
+				end, opts)
+				map("n", "<leader>e", function()
+					vim.cmd.RustLsp({ "renderDiagnostic", "current" })
+				end, opts)
 			end,
-			-- Specific settings for Lua Language Server
-			["lua_ls"] = function()
-				lspconfig.lua_ls.setup({
-					on_attach = on_attach,
-					capabilities = capabilities,
-					settings = {
-						Lua = {
-							runtime = {
-								version = "LuaJIT",
-								-- You might need to adjust this path depending on your Lua setup
-								path = vim.split(package.path, ";"),
-							},
-							diagnostics = {
-								-- Suppress "undefined global 'vim'" warnings in Neovim config files
-								globals = { "vim" },
-							},
-							workspace = {
-								-- Make the server aware of Neovim's runtime files for better completion/diagnostics
-								library = vim.api.nvim_get_runtime_li(""),
-								checkThirdParty = false,
-							},
-							telemetry = {
-								enable = false,
+			-- Configure `rust-analyzer` settings here.
+			default_settings = {
+				["rust-analyzer"] = {
+					checkOnSave = true,
+					cargo = {
+						loadOutDirsFromCheck = true,
+						features = "all",
+					},
+					procMacro = {
+						ignored = {
+							leptos_macro = {
+								"server",
 							},
 						},
 					},
-				})
-			end,
+				},
+			},
 		},
-	})
-
-	-- Global keymaps for LSP diagnostics
-	vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
-	vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
-	vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
-	vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
+	}
 end
 
 return M

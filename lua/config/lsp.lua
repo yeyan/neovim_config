@@ -2,9 +2,11 @@
 local M = {}
 
 function M.setup()
-	print("loading lsp configration")
-
+	-- help vim to install lsp servers,
+	-- make the configuration self contained.
 	local mason = require("mason")
+	-- still needed, without this lsp won't load,
+	-- as vim can't automatically find the binaries installed
 	local mason_lspconfig = require("mason-lspconfig")
 
 	-- Set up Mason (LSP server installer)
@@ -18,9 +20,9 @@ function M.setup()
 		},
 	})
 
+	-- config keybindings
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(ev)
-			print("on attached called")
 			local bufnr = ev.buf
 
 			vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
@@ -44,7 +46,7 @@ function M.setup()
 		end,
 	})
 
-	-- Setup Mason to install and configure specific LSP servers
+	-- Setup Mason to what to install and what not to install
 	mason_lspconfig.setup({
 		ensure_installed = {
 			"lua_ls", -- Lua Language Server

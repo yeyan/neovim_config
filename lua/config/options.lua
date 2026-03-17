@@ -1,3 +1,5 @@
+vim.g.mapleader = "\\"
+
 -- Basic Neovim options (add more here as needed)
 vim.opt.nu = true                 -- Line numbers
 vim.opt.relativenumber = true     -- Relative line numbers

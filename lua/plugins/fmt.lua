@@ -15,11 +15,17 @@ return {
                 prettier = {
                     command = "/home/haskell/.nvm/versions/node/v24.5.0/bin/prettier",
                 },
+                rustfmt = {
+                    command = "rustfmt",
+                    args = { "--edition", "2024", "$FILENAME" },
+                    require_cwd = true,
+                }
             },
             -- Define which formatters to use for each filetype
             formatters_by_ft = {
                 lua = { "stylua" },   -- Use stylua for Lua files
                 rust = { "rustfmt" }, -- Use rustfmt for Rust files
+                python = { "isort", "black" },
                 html = { "prettier" },
                 javascript = { "prettier" },
                 javascriptreact = { "prettier" },

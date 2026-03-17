@@ -23,9 +23,6 @@ require("lazy").setup("plugins", {
 	},
 })
 
--- load LSP config
-require("config.lsp")
-
 -- set colorscheme
 vim.cmd("colorscheme catppuccin")
 
